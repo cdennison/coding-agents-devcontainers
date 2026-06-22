@@ -31,7 +31,7 @@ From any project directory (assuming it has no `.devcontainer` yet), drop in
 ours with one line:
 
 ```bash
-mkdir -p .devcontainer && printf '{\n  "image": "ghcr.io/cdennison/coding-agents-devcontainers:claude-superpowers-headroom-0.1"\n}\n' > .devcontainer/devcontainer.json
+mkdir -p .devcontainer && printf '{\n  "image": "ghcr.io/cdennison/coding-agents-devcontainers:latest"\n}\n' > .devcontainer/devcontainer.json
 ```
 
 That's it. The image is pre-built and published, so there's nothing to compile
@@ -44,8 +44,8 @@ locally. Now open the folder:
 You land in a reproducible, isolated workspace where Claude Code and its tools
 are already installed and wired up — the same way on every machine.
 
-Want to pin to a different version? Swap the tag (e.g. `:latest`) in the
-`image` field.
+Want to pin to a fixed version instead of `latest`? Swap the tag (e.g.
+`:claude-superpowers-headroom-0.1`) in the `image` field.
 
 ## What's in the box
 

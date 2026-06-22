@@ -8,6 +8,11 @@
 #   scripts/build-and-deploy.sh --no-push    # build + test only (no push)
 #   IMAGE=ghcr.io/you/img:tag scripts/build-and-deploy.sh
 #
+# On success it leaves a long-lived container running and prints the
+# `docker exec` command to use for the next step. Claude Code auth is stored in
+# a named volume, so you only have to `claude login` once: the credentials
+# survive across container restarts and rebuilds.
+#
 # Requires: docker, and the devcontainer CLI (npm i -g @devcontainers/cli).
 # Pushing requires you to be logged in to the registry (e.g. `docker login ghcr.io`).
 
@@ -15,6 +20,8 @@ set -euo pipefail
 
 IMAGE="${IMAGE:-ghcr.io/cdennison/coding-agents-devcontainers:latest}"
 WORKSPACE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CONTAINER_NAME="${CONTAINER_NAME:-coding-agents-dev}"
+CLAUDE_VOLUME="${CLAUDE_VOLUME:-coding-agents-claude-home}"
 PUSH=true
 [[ "${1:-}" == "--no-push" ]] && PUSH=false
 
@@ -61,3 +68,21 @@ if [[ "${PUSH}" == "true" ]]; then
 else
   step "Skipping push (--no-push)"
 fi
+
+# Leave a long-lived container running so you can exec in and test interactively.
+# The named volume keeps /home/vscode/.claude (including the login token) so you
+# don't have to re-authenticate Claude Code every time.
+step "Starting container '${CONTAINER_NAME}' for interactive testing"
+docker rm -f "${CONTAINER_NAME}" >/dev/null 2>&1 || true
+docker run -d --name "${CONTAINER_NAME}" \
+  -u vscode -e HOME=/home/vscode \
+  -v "${CLAUDE_VOLUME}:/home/vscode/.claude" \
+  -v "${WORKSPACE}:/workspaces/$(basename "${WORKSPACE}")" \
+  -w "/workspaces/$(basename "${WORKSPACE}")" \
+  "${IMAGE}" sleep infinity >/dev/null \
+  || fail "could not start test container"
+
+printf '\n\033[1;32mNext step — exec in and test:\033[0m\n\n'
+printf '    docker exec -it %s bash\n\n' "${CONTAINER_NAME}"
+printf 'Then run `claude` (login persists in the \047%s\047 volume, so only once).\n' "${CLAUDE_VOLUME}"
+printf 'Tear down with:  docker rm -f %s\n' "${CONTAINER_NAME}"
