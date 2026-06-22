@@ -25,25 +25,45 @@ Getting a coding agent productive on a new machine is more work than it looks:
 
 ## The fix
 
-One line gives you a devcontainer with an opinionated stack of everything a
-coding agent needs — already wired together and ready to go:
+## Quick start
+
+From any project directory (assuming it has no `.devcontainer` yet), drop in
+ours with one line:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<owner>/coding-agents-devcontainers/main/install.sh | bash
+mkdir -p .devcontainer && printf '{\n  "image": "ghcr.io/cdennison/coding-agents-devcontainers:claude-superpowers-headroom-0.1"\n}\n' > .devcontainer/devcontainer.json
 ```
 
-Open it in VS Code, a JetBrains IDE, or the `devcontainer` CLI and you have a
-reproducible, isolated workspace where Claude Code and Codex just work — the
-same way on every machine.
+That's it. The image is pre-built and published, so there's nothing to compile
+locally. Now open the folder:
+
+- **VS Code** — "Dev Containers: Reopen in Container"
+- **CLI** — `devcontainer up --workspace-folder .` then
+  `devcontainer exec --workspace-folder . bash`
+
+You land in a reproducible, isolated workspace where Claude Code and its tools
+are already installed and wired up — the same way on every machine.
+
+Want to pin to a different version? Swap the tag (e.g. `:latest`) in the
+`image` field.
 
 ## What's in the box
 
-- Coding agent CLIs (Claude Code, Codex) pre-installed and on `PATH`
-- Common language runtimes and package managers
-- The everyday tooling agents reach for: `git`, `ripgrep`, `fzf`, build tools
-- Sensible defaults for MCP servers, hooks, and permissions
-- Full isolation from your host — the agent runs in the container, not on your
-  machine
+Everything below is installed, wired up, and verified on every build:
+
+- **Claude Code** CLI, pre-installed and on `PATH`
+- **[Superpowers](https://github.com/obra/superpowers)** plugin — TDD,
+  debugging, and collaboration skills, enabled out of the box (its SessionStart
+  hook greets you with "You have superpowers")
+- **[Caveman](https://github.com/JuliusBrussee/caveman)** plugin — enabled and
+  ready (`caveman mode` / `/caveman`)
+- **[Headroom](https://pypi.org/project/headroom-ai/)** — prompt/context
+  compression (proxy, MCP, code/image compression, relevance, agno, langchain),
+  installed torch-free so there's no unusable multi-GB CUDA payload
+- **[ccusage](https://github.com/ryoppippi/ccusage)** — Claude Code usage/cost
+  reporting, installed globally so it runs instantly (no first-use download)
+- **Node 22** and **Python 3** runtimes
+- Runs as the non-root `vscode` user, fully isolated from your host
 
 ## The best part: it's been scanned and found secure
 
