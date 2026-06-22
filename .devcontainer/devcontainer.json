@@ -1,0 +1,6 @@
+{
+  "name": "coding-agents-devcontainers",
+  "build": {
+    "dockerfile": "Dockerfile"
+  }
+}
